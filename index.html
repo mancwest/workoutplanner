@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weekly Workout Planner</title>
+<meta name="description" content="Offline weekly workout planner: yoga, meditation, strength and WOD tracking.">
+<meta name="theme-color" content="#15181A">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WOD Planner">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-loading" class="app-loading">
+  <div class="loading-ring" aria-hidden="true"></div>
+  <p>Loading your workouts&hellip;</p>
+</div>
+
+<div id="load-error" class="load-error" hidden>
+  <div class="load-error-box">
+    <p class="load-error-title">Workout database could not be loaded.</p>
+    <p>Make sure <code>workouts.json</code> is saved in the same folder as this app.</p>
+    <p>If you're testing this on your computer by double-clicking <code>index.html</code>, browsers block local file loading &mdash; run a simple local server instead (see the README), or open the app from GitHub Pages.</p>
+    <button id="retry-load-btn" class="btn btn-primary">Try Again</button>
+  </div>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <!-- ============ PLAN SCREEN ============ -->
+  <section id="screen-plan" class="screen" data-screen="plan" aria-labelledby="plan-heading">
+    <header class="plan-header">
+      <div class="week-nav">
+        <button type="button" class="icon-btn" data-action="prev-week" aria-label="Previous week">&#8249;</button>
+        <div class="week-label">
+          <h1 id="plan-heading" class="screen-eyebrow">Weekly Plan</h1>
+          <span id="week-range" class="week-range">&nbsp;</span>
+        </div>
+        <button type="button" class="icon-btn" data-action="next-week" aria-label="Next week">&#8250;</button>
+      </div>
+      <button type="button" class="chip-btn" data-action="this-week">This Week</button>
+    </header>
+
+    <div id="weekly-balance" class="weekly-balance" aria-live="polite"></div>
+
+    <button type="button" id="build-week-btn" class="build-week-btn" data-action="open-build-week">
+      <span class="build-week-icon">&#10024;</span> Build My Week
+    </button>
+
+    <div id="day-cards" class="day-cards"></div>
+  </section>
+
+  <!-- ============ WORKOUT LIBRARY SCREEN ============ -->
+  <section id="screen-library" class="screen" data-screen="library" aria-labelledby="library-heading">
+    <header class="library-header">
+      <h1 id="library-heading" class="screen-eyebrow">Workout Library</h1>
+      <div class="search-row">
+        <input type="search" id="library-search" placeholder="Search workouts&hellip;" aria-label="Search workouts">
+        <button type="button" class="icon-btn filter-btn" data-action="open-filters" aria-label="Filters">&#9881;<span id="filter-count-badge" class="filter-badge" hidden>0</span></button>
+      </div>
+      <div id="filter-chips" class="filter-chips"></div>
+    </header>
+
+    <div id="recent-viewed-wrap" class="recent-viewed-wrap" hidden>
+      <h2 class="section-label">Recently Viewed</h2>
+      <div id="recent-viewed" class="recent-viewed"></div>
+    </div>
+
+    <p id="library-results-meta" class="results-meta"></p>
+    <div id="library-list" class="workout-list" role="list"></div>
+    <button type="button" id="load-more-btn" class="load-more-btn" hidden data-action="load-more">Load More</button>
+  </section>
+
+  <!-- ============ PROGRESS SCREEN ============ -->
+  <section id="screen-progress" class="screen" data-screen="progress" aria-labelledby="progress-heading">
+    <header class="screen-header-simple">
+      <h1 id="progress-heading" class="screen-eyebrow">&#128202; Progress</h1>
+    </header>
+    <div id="progress-content"></div>
+  </section>
+
+  <!-- ============ SETTINGS SCREEN ============ -->
+  <section id="screen-settings" class="screen" data-screen="settings" aria-labelledby="settings-heading">
+    <header class="screen-header-simple">
+      <h1 id="settings-heading" class="screen-eyebrow">&#9881;&#65039; Settings</h1>
+    </header>
+    <div id="settings-content"></div>
+  </section>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button type="button" class="nav-btn active" data-action="nav" data-screen="plan" aria-current="page">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Plan</span>
+    </button>
+    <button type="button" class="nav-btn" data-action="nav" data-screen="library">
+      <span class="nav-icon">&#128269;</span><span class="nav-label">Workouts</span>
+    </button>
+    <button type="button" class="nav-btn" data-action="nav" data-screen="progress">
+      <span class="nav-icon">&#128202;</span><span class="nav-label">Progress</span>
+    </button>
+    <button type="button" class="nav-btn" data-action="nav" data-screen="settings">
+      <span class="nav-icon">&#9881;&#65039;</span><span class="nav-label">Settings</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div id="modal-overlay" class="modal-overlay" hidden data-action="overlay-close">
+  <div id="modal-box" class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button type="button" class="modal-close" data-action="close-modal" aria-label="Close dialog">&#10005;</button>
+    <div id="modal-content" class="modal-content"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="import-file-input" accept="application/json" hidden>
+
+<script src="js/utils.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/workoutData.js"></script>
+<script src="js/planner.js"></script>
+<script src="js/builder.js"></script>
+<script src="js/ui-modals.js"></script>
+<script src="js/ui-plan.js"></script>
+<script src="js/ui-library.js"></script>
+<script src="js/ui-progress.js"></script>
+<script src="js/ui-settings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
