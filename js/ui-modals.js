@@ -292,7 +292,7 @@
       <label style="margin-top:16px;">Notes<textarea id="sf-notes" placeholder="Free-text notes&hellip;">${Utils.escapeHtml(strengthDraft.notes)}</textarea></label>
 
       <label class="toggle-row" style="cursor:pointer;">
-        <span><span class="tr-label">Save as reusable template</span><span class="tr-sub" style="display:block;">Keep this in your saved strength workouts</span></span>
+        <span><span class="tr-label">Save as reusable template</span><span class="tr-sub">Keep this in your saved strength workouts</span></span>
         <span class="switch"><input type="checkbox" id="sf-save-template" ${strengthDraft.saveAsTemplate ? "checked" : ""}><span class="switch-track"></span></span>
       </label>
 
@@ -478,14 +478,14 @@
         ], p.style)}</div>
       </div>
 
-      <div class="toggle-row">
+      <label class="toggle-row" style="cursor:pointer;">
         <span class="tr-label">Avoid repeated movements</span>
         <span class="switch"><input type="checkbox" id="bmw-avoid-movements" ${p.avoidRepeatMovements ? "checked" : ""}><span class="switch-track"></span></span>
-      </div>
-      <div class="toggle-row">
+      </label>
+      <label class="toggle-row" style="cursor:pointer;">
         <span class="tr-label">Avoid repeated equipment</span>
         <span class="switch"><input type="checkbox" id="bmw-avoid-equipment" ${p.avoidRepeatEquipment ? "checked" : ""}><span class="switch-track"></span></span>
-      </div>
+      </label>
 
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
@@ -654,14 +654,14 @@
           </div>
         </div>
 
-        <div class="toggle-row">
+        <label class="toggle-row" style="cursor:pointer;">
           <span><span class="tr-label">Only show workouts I can do</span><span class="tr-sub">Based on My Equipment in Settings</span></span>
           <span class="switch"><input type="checkbox" id="f-only-mine" ${draft.onlyMyEquipment ? "checked" : ""}><span class="switch-track"></span></span>
-        </div>
-        <div class="toggle-row">
+        </label>
+        <label class="toggle-row" style="cursor:pointer;">
           <span class="tr-label">Favorites only</span>
           <span class="switch"><input type="checkbox" id="f-favorites" ${draft.favoritesOnly ? "checked" : ""}><span class="switch-track"></span></span>
-        </div>
+        </label>
 
         <div class="modal-actions">
           <button type="button" id="f-reset" class="btn btn-secondary">Reset</button>
