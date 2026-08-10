@@ -6,7 +6,7 @@ stretching, whatever you like) is fully customizable in Settings — add,
 remove, rename, or retime any item, or leave it empty if mornings aren't
 part of your plan. It's a plain HTML/CSS/JS app (no
 frameworks, no build step, no backend) built around your WODWell export
-of 1,000 workouts. Everything you plan, complete, or save lives only in
+of 7,406 workouts. Everything you plan, complete, or save lives only in
 your browser's local storage on your phone — nothing is ever sent
 anywhere.
 
@@ -85,6 +85,19 @@ of the files. So:
 - **Build My Week's "5 WODs"** — since the planner is inherently five
   weekday slots (one WOD per day), this is fixed rather than an
   adjustable number in the Build My Week preferences.
+- **How duration/type/equipment/movement tags are generated** — your
+  updated 7,406-workout export is a different, sparser format than the
+  original (no structured duration, equipment, movement, or WOD-type
+  fields, just the free-text prescription). Those tags are now
+  extracted from the workout text itself using pattern matching, then
+  cross-checked against well-known benchmark WODs (Fran, Cindy, Murph,
+  Grace, etc.) for accuracy. It's good, but not perfect: explicit
+  duration is only stated in about a quarter of workouts (a "For Time"
+  WOD often doesn't have one anyway, matching how the app already
+  treats unstated duration as "Unknown"), and equipment/movement tags
+  are inferred from wording rather than pulled from a fixed list, so
+  the occasional workout may be mis-tagged or under-tagged compared to
+  the original 1,000-workout set.
 
 ## Project structure
 
@@ -93,7 +106,7 @@ index.html          App shell (Plan / Workouts / Progress / Settings)
 styles.css           All styling (chalkboard dark theme + whiteboard light theme)
 manifest.json         PWA metadata (name, icons, start URL)
 service-worker.js     Offline caching
-workouts.json         Your trimmed WODWell workout database (1,000 workouts)
+workouts.json         Your trimmed WODWell workout database (7,406 workouts)
 js/
   utils.js             Date/formatting helpers
   storage.js           localStorage data layer (only module that touches it)
