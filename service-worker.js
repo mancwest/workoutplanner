@@ -8,7 +8,7 @@
    doesn't match CACHE_NAME, so stale versions never stick around forever.
    ========================================================================= */
 
-const CACHE_NAME = "wod-planner-v2";
+const CACHE_NAME = "wod-planner-v4";
 
 const PRECACHE_ASSETS = [
   "./",
