@@ -1,6 +1,7 @@
 /* =========================================================================
-   ui-settings.js — the SETTINGS screen: My Equipment, default morning
-   routine & strength duration, theme, and data export/import/clear.
+   ui-settings.js — the SETTINGS screen: My Equipment, Morning Routine
+   (add/remove/edit your own items), default strength duration, theme,
+   and data export/import/clear.
    Exposed on window.App.Settings
    ========================================================================= */
 (function () {
@@ -24,6 +25,22 @@
     }).join("");
   }
 
+  // Reuses the .exercise-row / .remove-ex-btn / .add-ex-btn styling from
+  // the strength editor's exercise list, since it's the same "editable
+  // rows with a remove button and an add-row button" shape.
+  function morningRoutineRowsHTML(settings) {
+    if (!settings.morningRoutine.length) {
+      return `<p class="settings-hint" style="margin:0 0 10px;">No morning routine items \u2014 add one below, or leave it empty if mornings aren't part of your plan.</p>`;
+    }
+    return settings.morningRoutine.map((item, i) => `
+      <div class="exercise-row">
+        <input type="text" placeholder="Name" value="${Utils.escapeHtml(item.name)}" data-mr-field="name" data-mr-index="${i}">
+        <input type="text" class="ex-sets" placeholder="Min" value="${item.minutes}" data-mr-field="minutes" data-mr-index="${i}">
+        <button type="button" class="remove-ex-btn" data-action="remove-morning-item" data-index="${i}" aria-label="Remove ${Utils.escapeHtml(item.name)}">&#10005;</button>
+      </div>
+    `).join("");
+  }
+
   function render() {
     const screen = document.getElementById("screen-settings");
     if (!screen.classList.contains("active")) return;
@@ -37,11 +54,10 @@
       </div>
 
       <div class="settings-section">
-        <h2>Default Morning Routine</h2>
-        <div class="field-row">
-          <label>Yoga (minutes)<input type="number" id="set-yoga-min" min="1" max="180" value="${settings.morningRoutine.yogaMin}"></label>
-          <label>Meditation (minutes)<input type="number" id="set-med-min" min="1" max="180" value="${settings.morningRoutine.meditationMin}"></label>
-        </div>
+        <h2>Morning Routine</h2>
+        <p class="settings-hint">What shows up under Morning Routine every weekday. Add, remove, rename, or change the length of anything here \u2014 it doesn't have to be yoga and meditation.</p>
+        <div id="morning-routine-rows">${morningRoutineRowsHTML(settings)}</div>
+        <button type="button" class="add-ex-btn" data-action="add-morning-item">+ Add Item</button>
       </div>
 
       <div class="settings-section">
@@ -90,22 +106,25 @@
       });
     });
 
-    const yogaInput = document.getElementById("set-yoga-min");
-    yogaInput.addEventListener("change", (e) => {
-      const settings = Storage.getSettings();
-      settings.morningRoutine.yogaMin = Utils.clamp(Number(e.target.value) || 1, 1, 180);
-      Storage.saveSettings(settings);
-      window.App.UI.showToast("Saved");
-      window.App.Plan.render();
-    });
-
-    const medInput = document.getElementById("set-med-min");
-    medInput.addEventListener("change", (e) => {
-      const settings = Storage.getSettings();
-      settings.morningRoutine.meditationMin = Utils.clamp(Number(e.target.value) || 1, 1, 180);
-      Storage.saveSettings(settings);
-      window.App.UI.showToast("Saved");
-      window.App.Plan.render();
+    document.querySelectorAll('[data-mr-field]').forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const settings = Storage.getSettings();
+        const idx = Number(e.target.dataset.mrIndex);
+        const field = e.target.dataset.mrField;
+        const item = settings.morningRoutine[idx];
+        if (!item) return;
+        if (field === "name") {
+          const trimmed = e.target.value.trim();
+          item.name = trimmed || item.name; // don't allow it to go blank
+          e.target.value = item.name;
+        } else if (field === "minutes") {
+          item.minutes = Utils.clamp(Number(e.target.value) || 1, 1, 180);
+          e.target.value = item.minutes;
+        }
+        Storage.saveSettings(settings);
+        window.App.UI.showToast("Saved");
+        window.App.Plan.render();
+      });
     });
 
     const strengthDur = document.getElementById("set-strength-duration");
@@ -114,6 +133,22 @@
       settings.strengthDefaultDuration = Number(e.target.value);
       Storage.saveSettings(settings);
     });
+  }
+
+  function handleAddMorningItem() {
+    const settings = Storage.getSettings();
+    settings.morningRoutine.push({ id: Utils.uid("mr"), name: "New Item", minutes: 15 });
+    Storage.saveSettings(settings);
+    render();
+    window.App.Plan.render();
+  }
+
+  function handleRemoveMorningItem(index) {
+    const settings = Storage.getSettings();
+    settings.morningRoutine.splice(Number(index), 1);
+    Storage.saveSettings(settings);
+    render();
+    window.App.Plan.render();
   }
 
   function handleSetTheme(theme) {
@@ -193,5 +228,6 @@
   window.App = window.App || {};
   window.App.Settings = {
     render, handleSetTheme, handleExportData, handleImportClick, handleImportFile, handleClearData,
+    handleAddMorningItem, handleRemoveMorningItem,
   };
 })();

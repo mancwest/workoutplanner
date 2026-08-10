@@ -7,14 +7,20 @@
   "use strict";
 
   const Utils = window.App.Utils;
+  const Storage = window.App.Storage;
   const Planner = window.App.Planner;
 
-  const ACTIVITY_META = {
-    yoga: { icon: "&#127749;", label: "Yoga" },
-    meditation: { icon: "&#129497;", label: "Meditation" },
-    strength: { icon: "&#128170;", label: "Strength" },
-    wod: { icon: "&#128293;", label: "WOD" },
-  };
+  // Morning-routine entries are dynamic (Settings → Morning Routine), so the
+  // activity list is built fresh each render rather than hardcoded.
+  function activityMeta() {
+    const settings = Storage.getSettings();
+    const morning = settings.morningRoutine.map((item) => ({ key: item.id, icon: "&#127749;", label: item.name }));
+    return [
+      ...morning,
+      { key: "strength", icon: "&#128170;", label: "Strength" },
+      { key: "wod", icon: "&#128293;", label: "WOD" },
+    ];
+  }
 
   function pctBarHTML(done, total) {
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -24,13 +30,12 @@
   function thisWeekCardHTML() {
     const monday = Utils.formatDateLocal(Utils.getDefaultPlanningMonday());
     const progress = Planner.getWeekProgress(monday);
-    const rows = Object.keys(ACTIVITY_META).map((key) => {
-      const a = progress.perActivity[key];
-      const m = ACTIVITY_META[key];
+    const rows = activityMeta().map((m) => {
+      const a = progress.perActivity[m.key] || { done: 0, total: 0 };
       return `
         <div class="pw-row">
           <span class="pw-icon">${m.icon}</span>
-          <span class="pw-name">${m.label}</span>
+          <span class="pw-name">${Utils.escapeHtml(m.label)}</span>
           ${pctBarHTML(a.done, a.total)}
           <span class="pw-frac">${a.done}/${a.total}</span>
         </div>
@@ -49,32 +54,36 @@
 
   function totalsCardHTML() {
     const totals = Planner.getTotals();
+    const settings = Storage.getSettings();
+    const morningItemsHTML = settings.morningRoutine.map((item) => `
+      <div class="totals-item"><div class="totals-num">${totals.morning[item.id] || 0}</div><div class="totals-lbl">${Utils.escapeHtml(item.name)}</div></div>
+    `).join("");
     return `
       <h2>Totals</h2>
       <div class="totals-grid">
         <div class="totals-item"><div class="totals-num">${totals.wod}</div><div class="totals-lbl">WODs</div></div>
         <div class="totals-item"><div class="totals-num">${totals.strength}</div><div class="totals-lbl">Strength</div></div>
-        <div class="totals-item"><div class="totals-num">${totals.yoga}</div><div class="totals-lbl">Yoga</div></div>
-        <div class="totals-item"><div class="totals-num">${totals.meditation}</div><div class="totals-lbl">Meditation</div></div>
+        ${morningItemsHTML}
       </div>
     `;
   }
 
   function streaksCardHTML() {
     const s = Planner.getStreaks();
+    const settings = Storage.getSettings();
     const item = (num, label) => `
       <div class="streak-item">
         <span class="streak-flame">&#128293;</span>
-        <div><div class="streak-num">${num}</div><div class="streak-lbl">${label}</div></div>
+        <div><div class="streak-num">${num}</div><div class="streak-lbl">${Utils.escapeHtml(label)}</div></div>
       </div>
     `;
+    const morningItemsHTML = settings.morningRoutine.map((mi) => item(s.morning[mi.id] || 0, `${mi.name} streak`)).join("");
     return `
       <h2>Streaks</h2>
       <div class="streaks-grid">
         ${item(s.training, "Training streak")}
         ${item(s.wod, "WOD streak")}
-        ${item(s.yoga, "Yoga streak")}
-        ${item(s.meditation, "Meditation streak")}
+        ${morningItemsHTML}
       </div>
     `;
   }
@@ -84,14 +93,21 @@
     if (!weeks.length) {
       return `<div class="empty-state"><div class="es-icon">&#128197;</div><p class="es-title">No history yet</p><p>Plan your first week to start building a history.</p></div>`;
     }
+    const settings = Storage.getSettings();
     const items = weeks.map((week) => {
       const progress = Planner.getWeekProgress(week.startDate);
       const p = progress.perActivity;
+      const frac = (key) => p[key] || { done: 0, total: 0 };
+      const parts = [
+        `WOD ${frac("wod").done}/${frac("wod").total}`,
+        `Strength ${frac("strength").done}/${frac("strength").total}`,
+        ...settings.morningRoutine.map((mi) => `${Utils.escapeHtml(mi.name)} ${frac(mi.id).done}/${frac(mi.id).total}`),
+      ];
       return `
         <div class="history-item" data-action="view-history-week" data-monday="${week.startDate}">
           <div>
             <div class="history-week-label">Week of ${Utils.escapeHtml(Utils.formatWeekRange(week.startDate))}</div>
-            <div class="history-breakdown">WOD ${p.wod.done}/${p.wod.total} &middot; Strength ${p.strength.done}/${p.strength.total} &middot; Yoga ${p.yoga.done}/${p.yoga.total} &middot; Meditation ${p.meditation.done}/${p.meditation.total}</div>
+            <div class="history-breakdown">${parts.join(" &middot; ")}</div>
           </div>
           <div class="history-pct">${progress.pct}%</div>
         </div>

@@ -153,6 +153,8 @@
 
       // ---- Settings ----
       case "set-theme": window.App.Settings.handleSetTheme(el.dataset.theme); break;
+      case "add-morning-item": window.App.Settings.handleAddMorningItem(); break;
+      case "remove-morning-item": window.App.Settings.handleRemoveMorningItem(el.dataset.index); break;
       case "export-data": window.App.Settings.handleExportData(); break;
       case "import-data": window.App.Settings.handleImportClick(); break;
       case "clear-data": window.App.Settings.handleClearData(); break;

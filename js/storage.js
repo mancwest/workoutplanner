@@ -18,7 +18,7 @@
     RECENT: "wp_recent",
   };
 
-  const SCHEMA_VERSION = 1;
+  const SCHEMA_VERSION = 2;
   const RECENT_LIMIT = 20;
 
   // Equipment the user is assumed to own on first run, mapped to the
@@ -63,14 +63,64 @@
   function defaultSettings() {
     return {
       equipment: DEFAULT_EQUIPMENT_SLUGS.slice(),
-      morningRoutine: { yogaMin: 20, meditationMin: 10 },
+      // An ordered list rather than fixed fields, so people who don't do
+      // yoga/meditation can remove them, rename them, or add their own
+      // morning-routine items in Settings. "yoga"/"meditation" are just the
+      // default ids that ship on first run.
+      morningRoutine: [
+        { id: "yoga", name: "Yoga", minutes: 20 },
+        { id: "meditation", name: "Meditation", minutes: 10 },
+      ],
       strengthDefaultDuration: 30,
       theme: "system",
     };
   }
 
+  /**
+   * v1 -> v2: morningRoutine went from a fixed {yogaMin, meditationMin}
+   * object to a customizable array of {id, name, minutes}; completion
+   * records went from flat yoga/meditation booleans to a nested
+   * `morning: {itemId: bool}` map so any number of custom items can be
+   * tracked. Runs once, only against data that still has the old shape.
+   */
+  function migrateIfNeeded() {
+    const storedVersion = Number(getJSON(KEYS.SCHEMA, 0)) || 0;
+    if (storedVersion >= SCHEMA_VERSION) return;
+
+    if (storedVersion < 2) {
+      const rawSettings = getJSON(KEYS.SETTINGS, null);
+      if (rawSettings && rawSettings.morningRoutine && !Array.isArray(rawSettings.morningRoutine)) {
+        const old = rawSettings.morningRoutine;
+        rawSettings.morningRoutine = [
+          { id: "yoga", name: "Yoga", minutes: Number(old.yogaMin) || 20 },
+          { id: "meditation", name: "Meditation", minutes: Number(old.meditationMin) || 10 },
+        ];
+        setJSON(KEYS.SETTINGS, rawSettings);
+      }
+
+      const allCompletion = getJSON(KEYS.COMPLETION, {});
+      let touched = false;
+      Object.keys(allCompletion).forEach((dateStr) => {
+        const day = allCompletion[dateStr];
+        if (day && !day.morning && (typeof day.yoga === "boolean" || typeof day.meditation === "boolean")) {
+          day.morning = { yoga: !!day.yoga, meditation: !!day.meditation };
+          delete day.yoga;
+          delete day.meditation;
+          touched = true;
+        }
+      });
+      if (touched) setJSON(KEYS.COMPLETION, allCompletion);
+    }
+
+    setJSON(KEYS.SCHEMA, SCHEMA_VERSION);
+  }
+
   function init() {
-    if (getJSON(KEYS.SCHEMA, null) === null) setJSON(KEYS.SCHEMA, SCHEMA_VERSION);
+    if (getJSON(KEYS.SCHEMA, null) === null) {
+      setJSON(KEYS.SCHEMA, SCHEMA_VERSION); // brand new install, nothing to migrate
+    } else {
+      migrateIfNeeded();
+    }
     if (getJSON(KEYS.SETTINGS, null) === null) setJSON(KEYS.SETTINGS, defaultSettings());
     if (getJSON(KEYS.WEEKS, null) === null) setJSON(KEYS.WEEKS, {});
     if (getJSON(KEYS.COMPLETION, null) === null) setJSON(KEYS.COMPLETION, {});
@@ -84,12 +134,21 @@
     const s = getJSON(KEYS.SETTINGS, defaultSettings());
     // defensive merge in case an older backup is missing newer fields
     const d = defaultSettings();
+    // Array.isArray is the only thing that gates the fallback here — an
+    // *empty* array is a valid, deliberate "no morning routine" state (the
+    // user removed everything in Settings) and must be respected, not
+    // treated as missing/corrupt data and silently reset to the defaults.
+    let morningRoutine;
+    if (Array.isArray(s.morningRoutine)) {
+      morningRoutine = s.morningRoutine
+        .filter((i) => i && typeof i.id === "string" && i.id && typeof i.name === "string")
+        .map((i) => ({ id: i.id, name: i.name, minutes: Number(i.minutes) > 0 ? Number(i.minutes) : 10 }));
+    } else {
+      morningRoutine = d.morningRoutine; // old fixed-shape object, or missing entirely
+    }
     return {
       equipment: Array.isArray(s.equipment) ? s.equipment : d.equipment,
-      morningRoutine: {
-        yogaMin: Number(s.morningRoutine && s.morningRoutine.yogaMin) || d.morningRoutine.yogaMin,
-        meditationMin: Number(s.morningRoutine && s.morningRoutine.meditationMin) || d.morningRoutine.meditationMin,
-      },
+      morningRoutine,
       strengthDefaultDuration: Number(s.strengthDefaultDuration) || d.strengthDefaultDuration,
       theme: ["light", "dark", "system"].includes(s.theme) ? s.theme : "system",
     };
@@ -122,13 +181,21 @@
 
   function getDayCompletion(dateStr) {
     const all = getAllCompletion();
-    return all[dateStr] || { yoga: false, meditation: false, strength: false, wod: false };
+    return all[dateStr] || { morning: {}, strength: false, wod: false };
   }
 
+  // `activity` is "strength", "wod", or a morning-routine item id (which is
+  // arbitrary and user-defined, so those live in a nested `morning` map
+  // rather than as fixed top-level fields).
   function setDayCompletion(dateStr, activity, value) {
     const all = getAllCompletion();
-    const day = all[dateStr] || { yoga: false, meditation: false, strength: false, wod: false };
-    day[activity] = value;
+    const day = all[dateStr] || { morning: {}, strength: false, wod: false };
+    if (activity === "strength" || activity === "wod") {
+      day[activity] = value;
+    } else {
+      if (!day.morning) day.morning = {};
+      day.morning[activity] = value;
+    }
     all[dateStr] = day;
     return setJSON(KEYS.COMPLETION, all);
   }

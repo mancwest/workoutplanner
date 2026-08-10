@@ -37,13 +37,15 @@
     const wodTimeLabel = b.wodMinutes > 0
       ? Utils.formatMinutes(b.wodMinutes) + (b.wodUnknownCount ? ` +${b.wodUnknownCount} unknown` : "")
       : (b.wodUnknownCount ? "Unknown" : "\u2014");
+    const morningStatsHTML = b.morningBreakdown.map((m) => `
+      <div class="wb-stat"><div class="wb-num">${m.count}</div><div class="wb-lbl">${Utils.escapeHtml(m.name)}</div></div>
+    `).join("");
     return `
       <div class="wb-title">Weekly Balance</div>
       <div class="wb-grid">
         <div class="wb-stat"><div class="wb-num">${b.wodCount}</div><div class="wb-lbl">WODs</div></div>
         <div class="wb-stat"><div class="wb-num">${b.strengthCount}</div><div class="wb-lbl">Strength</div></div>
-        <div class="wb-stat"><div class="wb-num">${b.yogaCount}</div><div class="wb-lbl">Yoga</div></div>
-        <div class="wb-stat"><div class="wb-num">${b.meditationCount}</div><div class="wb-lbl">Meditation</div></div>
+        ${morningStatsHTML}
       </div>
       <div class="wb-times">
         <span>WOD time: <b>${Utils.escapeHtml(wodTimeLabel)}</b></span>
@@ -74,16 +76,12 @@
     const day = progress.day;
     const isToday = dateStr === Utils.todayLocalStr();
 
-    // Yoga
-    const yogaRow = activityRowHTML({
-      dateStr, activity: "yoga", checked: completion.yoga,
-      name: `<span class="wod-badge badge-yoga">Yoga</span> ${settings.morningRoutine.yogaMin} min`,
-    });
-    // Meditation
-    const medRow = activityRowHTML({
-      dateStr, activity: "meditation", checked: completion.meditation,
-      name: `<span class="wod-badge badge-yoga">Meditation</span> ${settings.morningRoutine.meditationMin} min`,
-    });
+    // Morning routine — a dynamic, user-configurable list of items
+    // (Settings → Morning Routine), not fixed to yoga/meditation.
+    const morningRowsHTML = settings.morningRoutine.map((item) => activityRowHTML({
+      dateStr, activity: item.id, checked: !!(completion.morning && completion.morning[item.id]),
+      name: `<span class="wod-badge badge-morning">${Utils.escapeHtml(item.name)}</span> ${item.minutes} min`,
+    })).join("");
 
     // Strength
     let strengthRow;
@@ -147,7 +145,7 @@
         <div class="day-card-body">
           <div class="activity-group">
             <div class="activity-group-title">&#127749; Morning Routine</div>
-            ${yogaRow}${medRow}
+            ${morningRowsHTML || '<div class="ai-name empty" style="padding:6px 2px;">No morning routine items \u2014 add some in Settings</div>'}
           </div>
           <div class="activity-group">
             <div class="activity-group-title">&#128170; Strength</div>

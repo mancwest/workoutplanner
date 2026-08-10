@@ -94,22 +94,30 @@
 
   function toggleCompletion(dateStr, activity) {
     const current = Storage.getDayCompletion(dateStr);
-    Storage.setDayCompletion(dateStr, activity, !current[activity]);
-    return !current[activity];
+    const currentVal = (activity === "strength" || activity === "wod")
+      ? !!current[activity]
+      : !!(current.morning && current.morning[activity]);
+    Storage.setDayCompletion(dateStr, activity, !currentVal);
+    return !currentVal;
   }
 
   /**
    * Completion summary for one date. "total" only counts components that
-   * are actually applicable that day: yoga & meditation are always
+   * are actually applicable that day: every morning-routine item is always
    * applicable (auto-created every weekday); strength/WOD only count once
    * something has actually been planned for that slot.
    */
   function getDayProgress(mondayStr, dateStr) {
     const day = getDayPlan(mondayStr, dateStr);
     const completion = Storage.getDayCompletion(dateStr);
+    const settings = Storage.getSettings();
+    const morningItems = settings.morningRoutine.map((item) => ({
+      key: item.id,
+      applicable: true,
+      done: !!(completion.morning && completion.morning[item.id]),
+    }));
     const items = [
-      { key: "yoga", applicable: true, done: !!completion.yoga },
-      { key: "meditation", applicable: true, done: !!completion.meditation },
+      ...morningItems,
       { key: "strength", applicable: !!day.strength, done: !!completion.strength },
       { key: "wod", applicable: !!day.wodId, done: !!completion.wod },
     ];
@@ -120,18 +128,14 @@
 
   function getWeekProgress(mondayStr) {
     const dates = Utils.getWeekDateStrings(mondayStr);
-    const perActivity = {
-      yoga: { done: 0, total: 0 },
-      meditation: { done: 0, total: 0 },
-      strength: { done: 0, total: 0 },
-      wod: { done: 0, total: 0 },
-    };
+    const perActivity = {};
     let done = 0, total = 0;
     dates.forEach((d) => {
       const p = getDayProgress(mondayStr, d);
       done += p.done; total += p.total;
       p.items.forEach((i) => {
         if (!i.applicable) return;
+        if (!perActivity[i.key]) perActivity[i.key] = { done: 0, total: 0 };
         perActivity[i.key].total += 1;
         if (i.done) perActivity[i.key].done += 1;
       });
@@ -168,15 +172,21 @@
       }
     });
 
-    const yogaCount = 5, meditationCount = 5; // auto-created every weekday
-    const yogaMinutes = yogaCount * settings.morningRoutine.yogaMin;
-    const meditationMinutes = meditationCount * settings.morningRoutine.meditationMin;
+    // Every morning-routine item happens each of the 5 planned weekdays.
+    const morningCount = 5;
+    const morningBreakdown = settings.morningRoutine.map((item) => ({
+      id: item.id,
+      name: item.name,
+      count: morningCount,
+      minutes: morningCount * item.minutes,
+    }));
+    const morningMinutesTotal = morningBreakdown.reduce((sum, m) => sum + m.minutes, 0);
     const wodMinutes = Math.round(wodSeconds / 60);
-    const totalMinutes = wodMinutes + strengthMinutes + yogaMinutes + meditationMinutes;
+    const totalMinutes = wodMinutes + strengthMinutes + morningMinutesTotal;
 
     return {
-      wodCount, strengthCount, yogaCount, meditationCount,
-      wodMinutes, wodUnknownCount, strengthMinutes, yogaMinutes, meditationMinutes, totalMinutes,
+      wodCount, strengthCount, morningBreakdown,
+      wodMinutes, wodUnknownCount, strengthMinutes, morningMinutesTotal, totalMinutes,
       movementCatCounts,
     };
   }
@@ -231,10 +241,12 @@
   }
 
   function getStreaks() {
+    const settings = Storage.getSettings();
+    const morning = {};
+    settings.morningRoutine.forEach((item) => { morning[item.id] = computeStreak(item.id); });
     return {
       training: computeStreak(null),
-      yoga: computeStreak("yoga"),
-      meditation: computeStreak("meditation"),
+      morning,
       wod: computeStreak("wod"),
     };
   }
@@ -242,13 +254,19 @@
   /** All-time totals across every date that has completion data. */
   function getTotals() {
     const completion = Storage.getAllCompletion();
-    const totals = { wod: 0, strength: 0, yoga: 0, meditation: 0 };
+    const settings = Storage.getSettings();
+    const morning = {};
+    settings.morningRoutine.forEach((item) => { morning[item.id] = 0; });
+    const totals = { wod: 0, strength: 0, morning };
     Object.keys(completion).forEach((dateStr) => {
       const c = completion[dateStr];
       if (c.wod) totals.wod++;
       if (c.strength) totals.strength++;
-      if (c.yoga) totals.yoga++;
-      if (c.meditation) totals.meditation++;
+      if (c.morning) {
+        Object.keys(c.morning).forEach((itemId) => {
+          if (c.morning[itemId] && itemId in totals.morning) totals.morning[itemId]++;
+        });
+      }
     });
     return totals;
   }
