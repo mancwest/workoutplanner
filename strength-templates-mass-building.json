@@ -1,0 +1,72 @@
+{
+  "exportedAt": "2026-08-09T00:00:00.000Z",
+  "schemaVersion": 1,
+  "strengthLibrary": [
+    {
+      "id": "mnb-chest-triceps",
+      "name": "Mass Building \u2014 Chest & Triceps",
+      "muscleGroup": "Chest",
+      "duration": 60,
+      "exercises": [
+        { "id": "mnb-ct-1", "name": "Barbell Bench Press", "sets": "4", "reps": "10, 8, 8, 6" },
+        { "id": "mnb-ct-2", "name": "Incline Bench Press", "sets": "3", "reps": "8, 8, 6" },
+        { "id": "mnb-ct-3", "name": "Decline Bench Press", "sets": "3", "reps": "8, 8, 6" },
+        { "id": "mnb-ct-4", "name": "Dumbbell Flys", "sets": "2", "reps": "10" },
+        { "id": "mnb-ct-5", "name": "Dumbbell Pullover", "sets": "2", "reps": "8" },
+        { "id": "mnb-ct-6", "name": "Tricep Extension", "sets": "4", "reps": "10, 8, 8, 6" },
+        { "id": "mnb-ct-7", "name": "Tricep Dip", "sets": "3", "reps": "10" },
+        { "id": "mnb-ct-8", "name": "Tricep Bench Dip", "sets": "3", "reps": "8" }
+      ],
+      "notes": "From the Muscle & Strength 10-Week Mass Building Program (hardgainer split). Add weight as reps drop on pyramid sets (e.g. the bench press and tricep extension lines)."
+    },
+    {
+      "id": "mnb-back-biceps",
+      "name": "Mass Building \u2014 Back & Biceps",
+      "muscleGroup": "Back",
+      "duration": 55,
+      "exercises": [
+        { "id": "mnb-bb-1", "name": "Chin Up", "sets": "2", "reps": "8" },
+        { "id": "mnb-bb-2", "name": "One Arm Dumbbell Row", "sets": "3", "reps": "8" },
+        { "id": "mnb-bb-3", "name": "Seated Row", "sets": "2", "reps": "8" },
+        { "id": "mnb-bb-4", "name": "Bent Over Barbell Row", "sets": "2", "reps": "8" },
+        { "id": "mnb-bb-5", "name": "Lat Pull Down", "sets": "3", "reps": "10, 10, 8" },
+        { "id": "mnb-bb-6", "name": "Standing Barbell Curl", "sets": "3", "reps": "8, 8, 6" },
+        { "id": "mnb-bb-7", "name": "Close Grip Preacher Curl", "sets": "3", "reps": "8, 8, 6" },
+        { "id": "mnb-bb-8", "name": "Incline Dumbbell Curl", "sets": "2", "reps": "12-14" },
+        { "id": "mnb-bb-9", "name": "Concentration Curl", "sets": "2", "reps": "10" }
+      ],
+      "notes": "From the Muscle & Strength 10-Week Mass Building Program (hardgainer split)."
+    },
+    {
+      "id": "mnb-shoulders-forearms",
+      "name": "Mass Building \u2014 Shoulders & Forearms",
+      "muscleGroup": "Shoulders",
+      "duration": 50,
+      "exercises": [
+        { "id": "mnb-sf-1", "name": "Machine Shoulder Press", "sets": "3", "reps": "10" },
+        { "id": "mnb-sf-2", "name": "Dumbbell Reverse Fly", "sets": "3", "reps": "8-10" },
+        { "id": "mnb-sf-3", "name": "Military Press", "sets": "4", "reps": "10" },
+        { "id": "mnb-sf-4", "name": "Dumbbell Lateral Raise", "sets": "2", "reps": "10" },
+        { "id": "mnb-sf-5", "name": "Dumbbell Shrugs", "sets": "2", "reps": "10" },
+        { "id": "mnb-sf-6", "name": "Upright Row", "sets": "2", "reps": "10" },
+        { "id": "mnb-sf-7", "name": "Standing Wrist Curl", "sets": "4", "reps": "10" },
+        { "id": "mnb-sf-8", "name": "Barbell Wrist Curl", "sets": "4", "reps": "10" }
+      ],
+      "notes": "From the Muscle & Strength 10-Week Mass Building Program (hardgainer split). Shrugs and Upright Row can be supersetted back-to-back."
+    },
+    {
+      "id": "mnb-legs",
+      "name": "Mass Building \u2014 Legs",
+      "muscleGroup": "Legs",
+      "duration": 45,
+      "exercises": [
+        { "id": "mnb-lg-1", "name": "Squat", "sets": "5", "reps": "10, 8, 8, 6, 4" },
+        { "id": "mnb-lg-2", "name": "Leg Extension", "sets": "3", "reps": "12" },
+        { "id": "mnb-lg-3", "name": "Leg Curl", "sets": "3", "reps": "12" },
+        { "id": "mnb-lg-4", "name": "Standing Calf Raise", "sets": "4", "reps": "12" },
+        { "id": "mnb-lg-5", "name": "Seated Calf Raise", "sets": "2", "reps": "12" }
+      ],
+      "notes": "From the Muscle & Strength 10-Week Mass Building Program (hardgainer split). Add weight as reps drop on the squat's pyramid sets."
+    }
+  ]
+}

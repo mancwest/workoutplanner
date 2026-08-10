@@ -299,7 +299,7 @@ label input, label select, label textarea{ margin-top: 6px; }
 }
 .badge-wod{ background: rgba(255,107,91,.14); color: var(--accent-coral); border-color: rgba(255,107,91,.35); }
 .badge-strength{ background: rgba(124,156,255,.14); color: var(--accent-blue); border-color: rgba(124,156,255,.35); }
-.badge-yoga{ background: rgba(143,209,158,.16); color: var(--accent-green); border-color: rgba(143,209,158,.35); }
+.badge-morning{ background: rgba(143,209,158,.16); color: var(--accent-green); border-color: rgba(143,209,158,.35); }
 
 /* =========================== Chalk ring (signature motif) =========================== */
 .chalk-ring{ position: relative; display: inline-flex; align-items: center; justify-content: center; }

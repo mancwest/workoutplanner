@@ -1,7 +1,10 @@
 # Weekly Workout Planner
 
 A fully offline, mobile-first workout planner for a Mon–Fri routine of
-Yoga + Meditation + Strength + WOD. It's a plain HTML/CSS/JS app (no
+Morning Routine + Strength + WOD. The morning routine (yoga, meditation,
+stretching, whatever you like) is fully customizable in Settings — add,
+remove, rename, or retime any item, or leave it empty if mornings aren't
+part of your plan. It's a plain HTML/CSS/JS app (no
 frameworks, no build step, no backend) built around your WODWell export
 of 1,000 workouts. Everything you plan, complete, or save lives only in
 your browser's local storage on your phone — nothing is ever sent

@@ -1,0 +1,45 @@
+{
+  "exportedAt": "2026-08-09T00:00:00.000Z",
+  "schemaVersion": 1,
+  "strengthLibrary": [
+    {
+      "id": "core-a-upper",
+      "name": "Core \u2014 Upper Abs Focus",
+      "muscleGroup": "Core",
+      "duration": 15,
+      "exercises": [
+        { "id": "core-a-1", "name": "Crunches", "sets": "3", "reps": "15" },
+        { "id": "core-a-2", "name": "Weighted Crunch", "sets": "3", "reps": "12" },
+        { "id": "core-a-3", "name": "Reverse Crunch", "sets": "3", "reps": "15" },
+        { "id": "core-a-4", "name": "Plank", "sets": "3", "reps": "45 sec hold" }
+      ],
+      "notes": "Rotation 1 of 3 \u2014 upper-ab emphasis."
+    },
+    {
+      "id": "core-b-obliques",
+      "name": "Core \u2014 Obliques & Rotation",
+      "muscleGroup": "Core",
+      "duration": 15,
+      "exercises": [
+        { "id": "core-b-1", "name": "Russian Twist", "sets": "3", "reps": "20" },
+        { "id": "core-b-2", "name": "Side Plank (each side)", "sets": "3", "reps": "30 sec hold" },
+        { "id": "core-b-3", "name": "Bicycle Crunch", "sets": "3", "reps": "20" },
+        { "id": "core-b-4", "name": "Cable Woodchopper (each side)", "sets": "3", "reps": "12" }
+      ],
+      "notes": "Rotation 2 of 3 \u2014 obliques and rotational control."
+    },
+    {
+      "id": "core-c-lower",
+      "name": "Core \u2014 Lower Abs & Stability",
+      "muscleGroup": "Core",
+      "duration": 18,
+      "exercises": [
+        { "id": "core-c-1", "name": "Hanging Leg Raise", "sets": "3", "reps": "10-12" },
+        { "id": "core-c-2", "name": "Mountain Climbers", "sets": "3", "reps": "30 sec" },
+        { "id": "core-c-3", "name": "Dead Bug (each side)", "sets": "3", "reps": "10" },
+        { "id": "core-c-4", "name": "Ab Wheel Rollout", "sets": "3", "reps": "8-10" }
+      ],
+      "notes": "Rotation 3 of 3 \u2014 lower-ab and anti-extension stability work."
+    }
+  ]
+}
